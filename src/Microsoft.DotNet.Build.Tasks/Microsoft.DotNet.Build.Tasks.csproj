@@ -19,8 +19,11 @@
     <Compile Include="BinClashLogger.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="ExecWithMutex.cs" />
+    <Compile Include="EvaluateMSBuildProject.cs" />
     <Compile Include="GatherFoldersToRestore.cs" />
     <Compile Include="GenerateAssemblyList.cs" />
+    <Compile Include="AddDependenciesToProjectJson.cs" />
+    <Compile Include="GatherAssemblyVersionsFromPackageDrop.cs" />
     <Compile Include="GenerateResourcesCode.cs" />
     <Compile Include="GenerateEncodingTable.cs" />
     <Compile Include="GetPackageVersion.cs" />
