@@ -13,8 +13,8 @@
     <IncludeBuildNumberInPackageVersion Condition="'$(IncludeBuildNumberInPackageVersion)' == ''">true</IncludeBuildNumberInPackageVersion>
 
     <VersionSuffix Condition="'$(PreReleaseLabel)' != ''">-$(PreReleaseLabel)</VersionSuffix>
-    <VersionSuffix Condition="'$(IncludeBuildNumberInPackageVersion)' == 'true'">$(VersionSuffix)-$(BuildNumberMajor)</VersionSuffix>
-
+    <VersionSuffix Condition="'$(IncludeBuildNumberInPackageVersion)' == 'true'">$(VersionSuffix)-$(BuildNumberMajor)-$(BuildNumberMinor)</VersionSuffix>
+    
     <!--
       Empty out the project properties because we want configuration and platform to come from the individual
       projects instead of being overridden by the value the packages have.
@@ -66,6 +66,7 @@
     <OutputPath>$(PackageOutputPath)</OutputPath>
     <NuSpecOutputPath Condition="'$(NuSpecOutputPath)' == ''">$(PackageOutputPath)specs/</NuSpecOutputPath>
     <NuSpecPath>$(NuSpecOutputPath)$(Id)$(NuspecSuffix).nuspec</NuSpecPath>
+    <TargetPath>$(NuSpecPath)</TargetPath>
     <RuntimeFilePath Condition="'$(RuntimeFilePath)' == ''">$(NuSpecOutputPath)$(Id)$(NuspecSuffix)/runtime.json</RuntimeFilePath>
     <PlaceholderFile>$(MSBuildThisFileDirectory)_._</PlaceholderFile>
     <PackageDescriptionFile Condition="'$(PackageDescriptionFile)' == ''">path to descriptions.json must be specified</PackageDescriptionFile>
@@ -476,7 +477,7 @@
   </Target>
 
   <Target Name="GetNuGetPackageDependencies"
-          DependsOnTargets="GetFilePackageReferences">
+          DependsOnTargets="CreateVersionFileDuringBuild;GetFilePackageReferences">
     <PropertyGroup>
       <!-- determine if we have any reference assets in the package (files in the ref folder) -->
       <_containsReferenceAsset Condition="'%(File.IsReferenceAsset)' == 'true'">true</_containsReferenceAsset>
@@ -544,7 +545,7 @@
   <!-- Calculates the package version including any prerelease suffix -->
   <Target Name="CalculatePackageVersion"
         BeforeTargets="GenerateNuSpec;GetPackageIdentity"
-        DependsOnTargets="GetAssemblyVersionFromProjects">
+        DependsOnTargets="CreateVersionFileDuringBuild;GetAssemblyVersionFromProjects">
 
     <Error Text="No version could be detected.  Either specify the Version property or provide at least one managed assembly."
            Condition="'$(Version)' == '' AND '$(_AssemblyVersion)' == ''"
@@ -746,8 +747,8 @@
 
     <PropertyGroup>
       <Description Condition="'$(UseRuntimePackageDescription)' == 'true' AND '$(RuntimeDisclaimer)' != ''">$(RuntimeDisclaimer)</Description>
-      <Description Condition="'$(UseRuntimePackageDescription)' != 'true' AND '$(RuntimeDisclaimer)' != ''">$(RuntimeDisclaimer) \r\n $(Description)</Description>
-      <Description Condition="'@(SyncInfoLines)' != ''">$(Description) \r\n %(SyncInfoLines.Identity)</Description>
+      <Description Condition="'$(UseRuntimePackageDescription)' != 'true' AND '$(RuntimeDisclaimer)' != ''">$(RuntimeDisclaimer) %0A$(Description)</Description>
+      <Description Condition="'@(SyncInfoLines)' != ''">$(Description) %0A%(SyncInfoLines.Identity)</Description>
     </PropertyGroup>
   </Target>
 
@@ -890,7 +891,7 @@
       <_SkipCreatePackage Condition="'$(SkipCreatePackageOnMissingFiles)' == 'true' AND '@(_missingFiles)' != ''">true</_SkipCreatePackage>
     </PropertyGroup>
 
-    <Warning Condition="'$(_SkipCreatePackage)' == 'true'" Text="Skipping package creation for $(NuSpecPath) because the following files do not exist: @(_missingFiles)" />
+    <Message Condition="'$(_SkipCreatePackage)' == 'true'" Text="Skipping package creation for $(NuSpecPath) because the following files do not exist: @(_missingFiles)" />
 
     <NugetPack Nuspecs="$(NuSpecPath)"
                OutputDirectory="$(PackageOutputPath)"

@@ -24,6 +24,7 @@
     <Compile Include="GenerateAssemblyList.cs" />
     <Compile Include="AddDependenciesToProjectJson.cs" />
     <Compile Include="GatherAssemblyVersionsFromPackageDrop.cs" />
+    <Compile Include="GenerateCurrentVersion.cs" />
     <Compile Include="GenerateResourcesCode.cs" />
     <Compile Include="GenerateEncodingTable.cs" />
     <Compile Include="GetPackageVersion.cs" />
