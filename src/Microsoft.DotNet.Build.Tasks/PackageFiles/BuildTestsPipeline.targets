@@ -3,11 +3,12 @@
   <PropertyGroup>
     <AccountName></AccountName>
     <AccountKey></AccountKey>
-    <ContainerName></ContainerName>
+    <ContainerName>$(Branch)-$(Release)-$(BuildNumberMajor)-$(BuildNumberMinor)</ContainerName>
   </PropertyGroup>
   <PropertyGroup>
     <DownloadDirectory></DownloadDirectory>
   </PropertyGroup>
+  <!-- Not currently used -->
   <ItemGroup>
     <DownloadItems Include="Microsoft.CSharp.4.0.1-rc3-00001-00.nupkg" />
   </ItemGroup>
