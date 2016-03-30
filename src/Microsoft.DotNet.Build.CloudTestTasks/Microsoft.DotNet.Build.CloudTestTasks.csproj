@@ -26,6 +26,7 @@
     <Compile Include="..\common\AssemblyResolver.cs" />
     <Compile Include="CreateAzureContainer.cs" />
     <Compile Include="CreateAzureFileShare.cs" />
+    <Compile Include="DownloadFromAzure.cs" />
     <Compile Include="GetPerfTestAssemblies.cs" />
     <Compile Include="SendJsonToDocumentDb.cs" />
     <Compile Include="SendToEventHub.cs" />

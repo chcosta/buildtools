@@ -1,0 +1,24 @@
+<Project ToolsVersion="12.0" DefaultTargets="DownloadBlobsFromAzure" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask TaskName="DownloadFromAzure" AssemblyFile="$(ToolsDir)net45/Microsoft.DotNet.Build.CloudTestTasks.dll"/>
+  <PropertyGroup>
+    <AccountName></AccountName>
+    <AccountKey></AccountKey>
+    <ContainerName></ContainerName>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DownloadDirectory></DownloadDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <DownloadItems Include="Microsoft.CSharp.4.0.1-rc3-00001-00.nupkg" />
+  </ItemGroup>
+  
+  <Target Name="DownloadBlobsFromAzure">
+    <Message Text="DownloadFromAzure" />
+    <DownloadFromAzure AccountName="$(AccountName)"
+                       AccountKey="$(AccountKey)"
+                       ContainerName="$(ContainerName)"
+                       DownloadDirectory="$(DownloadDirectory)"
+                       Items="@(DownloadItems)" />
+  </Target>
+  
+</Project>
