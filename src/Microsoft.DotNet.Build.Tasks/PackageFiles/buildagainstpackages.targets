@@ -3,6 +3,7 @@
   <UsingTask TaskName="AddDependenciesToProjectJson" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll"/>
   <UsingTask TaskName="EvaluateMSBuildProject" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll"/>
   <UsingTask TaskName="GatherAssemblyVersionsFromPackageDrop" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll"/>
+  <UsingTask TaskName="GetPackageNumberFromPackageDrop" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll"/>
 
   <ItemGroup>
     <_PackagesDrops Include="$(PackagesDrops)" />
@@ -135,7 +136,17 @@
   <Target Name="AddDependenciesToProjectJson"
           DependsOnTargets="GatherProjectReferenceForProjectJson;DetermineProjectJsonPath"
           Condition="'@(_InjectProjectReferenceDependency)' != ''">
+    
     <Message Condition="'$(PackageBuildNumberOverride)' != ''" Text="Setting package version to '$(PackageBuildNumberOverride)'" />
+    <GetPackageNumberFromPackageDrop Condition="'@(_PackagesDrops)' != ''"
+                                     PackageDrops="@(_PackagesDrops)">
+      <Output TaskParameter="PackageNumber" PropertyName="_DerivedPackageNumber" />
+    </GetPackageNumberFromPackageDrop>
+    
+    <Message Condition="'$(PackageBuildNumberOverride)' == '' and '$(_DerivedPackageNumber)' != ''" Text="Derived package version from packagedrops.  Setting package version to '$(_DerivedPackageNumber)'" />
+    <PropertyGroup>
+        <PackageBuildNumberOverride Condition="'$(PackageBuildNumberOverride)' == '' and '$(_DerivedPackageNumber)' != ''">$(_DerivedPackageNumber)</PackageBuildNumberOverride>
+    </PropertyGroup>
     <AddDependenciesToProjectJson Condition="'$(ErrorNoVersion)' == ''"
                                   AdditionalDependencies="@(_InjectProjectReferenceDependency)"
                                   ProjectJson="$(OriginalProjectJson)"

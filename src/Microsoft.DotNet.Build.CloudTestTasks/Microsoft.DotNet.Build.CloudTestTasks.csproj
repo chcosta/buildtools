@@ -28,6 +28,7 @@
     <Compile Include="CreateAzureFileShare.cs" />
     <Compile Include="DownloadFromAzure.cs" />
     <Compile Include="GetPerfTestAssemblies.cs" />
+    <Compile Include="ListAzureContainers.cs" />
     <Compile Include="SendJsonToDocumentDb.cs" />
     <Compile Include="SendToEventHub.cs" />
     <Compile Include="UploadToAzure.cs" />

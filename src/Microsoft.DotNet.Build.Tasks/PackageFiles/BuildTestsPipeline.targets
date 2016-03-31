@@ -1,9 +1,12 @@
-<Project ToolsVersion="12.0" DefaultTargets="DownloadBlobsFromAzure" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="DownloadBlobsFromAzureTargets" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <UsingTask TaskName="DownloadFromAzure" AssemblyFile="$(ToolsDir)net45/Microsoft.DotNet.Build.CloudTestTasks.dll"/>
+  <UsingTask TaskName="ListAzureContainers" AssemblyFile="$(ToolsDir)net45/Microsoft.DotNet.Build.CloudTestTasks.dll"/>
+
   <PropertyGroup>
     <AccountName></AccountName>
     <AccountKey></AccountKey>
-    <ContainerName>$(Branch)-$(Release)-$(BuildNumberMajor)-$(BuildNumberMinor)</ContainerName>
+<!--    <ContainerName>$(Branch)-$(Release)-$(BuildNumberMajor)-$(BuildNumberMinor)</ContainerName> -->
+    <ContainerNamePrefix>$(Branch)-$(Release)-</ContainerNamePrefix>
   </PropertyGroup>
   <PropertyGroup>
     <DownloadDirectory></DownloadDirectory>
@@ -12,7 +15,22 @@
   <ItemGroup>
     <DownloadItems Include="Microsoft.CSharp.4.0.1-rc3-00001-00.nupkg" />
   </ItemGroup>
+
+  <Target Name="DownloadBlobsFromAzureTargets" DependsOnTargets="ListAzureContainers;DownloadBlobsFromAzure" />
   
+  <Target Name="ListAzureContainers">
+    <Message Text="ListAzureContainers" />
+    <ListAzureContainers AccountName="$(AccountName)"
+                         AccountKey="$(AccountKey)"
+                         Prefix="$(ContainerNamePrefix)">
+       <Output TaskParameter="ContainerNames" ItemName="AzureContainerName" />
+    </ListAzureContainers>
+    <Message Importance="High" Text="Container names: %(AzureContainerName.Identity)" />
+    <PropertyGroup>
+      <ContainerName>%(AzureContainerName.Identity)</ContainerName>
+    </PropertyGroup>
+  </Target>
+
   <Target Name="DownloadBlobsFromAzure">
     <Message Text="DownloadFromAzure" />
     <DownloadFromAzure AccountName="$(AccountName)"
