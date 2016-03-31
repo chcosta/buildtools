@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Build.Tasks
                     continue;
                 }
 
-                Regex packageMatch = new Regex(@"[^-]+-(\d\d\d\d\d)-");
+                Regex packageMatch = new Regex(@"[^-]+-((\w+-)?\d\d\d\d\d(-\d\d)?)");
                 foreach (string file in files)
                 {
                     Match m = packageMatch.Match(file);
