@@ -15,8 +15,8 @@ namespace Microsoft.DotNet.Build.Tasks
     /// </summary>
     public class AddDependenciesToProjectJson : Task
     {
-        private Regex VersionStructureRegex = new Regex(@"(\d+\.\d+\.\d+)-((beta|rc2|rc3)?-?(\d+(-\d\d)?))");
-        private Regex BuildNumberOverrideStructureRegex = new Regex(@"(beta|rc2|rc3)?-?(\d+(-\d\d)?)?");
+        private Regex VersionStructureRegex = new Regex(@"(\d+\.\d+\.\d+)-((beta|rc2|rc3)?-?(\d+(-\d+)?))");
+        private Regex BuildNumberOverrideStructureRegex = new Regex(@"(beta|rc2|rc3)?-?(\d+(-\d+)?)?");
         private Regex ThreePartVersionRegex = new Regex(@"(\d+\.\d+\.\d+)");
 
         // Additional Dependencies to add to the project.json. May Optionally contain a version.

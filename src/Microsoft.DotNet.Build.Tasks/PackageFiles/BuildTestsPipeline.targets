@@ -5,9 +5,14 @@
   <PropertyGroup>
     <AccountName></AccountName>
     <AccountKey></AccountKey>
-<!--    <ContainerName>$(Branch)-$(Release)-$(BuildNumberMajor)-$(BuildNumberMinor)</ContainerName> -->
     <ContainerNamePrefix>$(Branch)-$(Release)-</ContainerNamePrefix>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(BuildNumberMajor)' != ''">
+    <BuildNumberMinor Condition="'$(BuildNumberMinor)' == ''">0</BuildNumberMinor>
+    <ContainerName>$(Branch)-$(Release)-$(BuildNumberMajor)-$(BuildNumberMinor)</ContainerName>
+  </PropertyGroup>
+
   <PropertyGroup>
     <DownloadDirectory></DownloadDirectory>
   </PropertyGroup>
@@ -18,7 +23,8 @@
 
   <Target Name="DownloadBlobsFromAzureTargets" DependsOnTargets="ListAzureContainers;DownloadBlobsFromAzure" />
   
-  <Target Name="ListAzureContainers">
+  <!-- Grab latest azure container if a specific azure container is not specified -->
+  <Target Name="ListAzureContainers" Condition="'$(ContainerName)' == ''">
     <Message Text="ListAzureContainers" />
     <ListAzureContainers AccountName="$(AccountName)"
                          AccountKey="$(AccountKey)"
