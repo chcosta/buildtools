@@ -42,10 +42,13 @@
           DependsOnTargets="EvaluateBuildsProjects">
     <PropertyGroup>
       <OriginalProjectJson>$(ProjectJson)</OriginalProjectJson>
+      <GeneratedTargetGroup Condition="'$(GeneratedTargetGroup)' == ''">$(TargetGroup)</GeneratedTargetGroup>
+      <GeneratedOSGroup Condition="'$(GeneratedOSGroup)' == ''">$(OSGroup)</GeneratedOSGroup>
       <!-- We can't put the generated project.json in the output path or NuGet will interpret Microsoft.Win32.Primitives as a "project"
            type instead of a "package" type when generating the project.lock.json file, so we have to place our project.json in a different path location. -->
       <ProjectsGeneratedProjectJsonDir>$(GeneratedProjectJsonDir)\$(MSBuildProjectName)\</ProjectsGeneratedProjectJsonDir>
-      <ProjectsGeneratedProjectJsonDir Condition="'$(TargetGroup)' != ''">$(ProjectsGeneratedProjectJsonDir)$(TargetGroup)\</ProjectsGeneratedProjectJsonDir>
+      <ProjectsGeneratedProjectJsonDir Condition="'$(GeneratedOSGroup)' != ''">$(ProjectsGeneratedProjectJsonDir)$(GeneratedOSGroup)\</ProjectsGeneratedProjectJsonDir>
+      <ProjectsGeneratedProjectJsonDir Condition="'$(GeneratedTargetGroup)' != ''">$(ProjectsGeneratedProjectJsonDir)$(GeneratedTargetGroup)\</ProjectsGeneratedProjectJsonDir>
       <ProjectJson>$(ProjectsGeneratedProjectJsonDir)project.json</ProjectJson>
       <GeneratedProjectLockJson>$(ProjectsGeneratedProjectJsonDir)project.lock.json</GeneratedProjectLockJson>
       <!-- Not all projects generate a new project.json, so only update the project.lock.json if it has been restored. -->
@@ -58,21 +61,26 @@
        to generate the project.json's for each of those items. -->
   <Target Name="EvaluateBuildsProjects"
           Condition="'$(MSBuildProjectExtension)' == '.builds' and '@(Project)' != ''">
+    <!-- Add Project TargetGroup and OSGroup metadata to AdditionalProperties for DetermineProjectJsonPath to use -->
+    <ItemGroup>
+      <GeneratedProject Include="@(Project)">
+        <AdditionalProperties>GeneratedTargetGroup=%(Project.TargetGroup);GeneratedOSGroup=%(Project.OSGroup);%(Project.AdditionalProperties)</AdditionalProperties>
+      </GeneratedProject>
+    </ItemGroup>
     <!-- To Serialize we use msbuild's batching functionality '%' to force it to batch all similar projects with the same identity
          however since the project names are unique it will essentially force each to run in its own batch -->
     <MSBuild Targets="GenerateTestProjectJson"
-             Projects="@(Project)"
+             Projects="@(GeneratedProject)"
              Condition="'$(SerializeProjects)' != 'true'"
              BuildInParallel="true"
-             ContinueOnError="ErrorAndContinue" 
-             Properties="TargetGroup=%(Project.TargetGroup)" />
+             ContinueOnError="ErrorAndContinue" />
 
     <MSBuild Targets="GenerateTestProjectJson"
-             Projects="@(Project)"
+             Projects="@(GeneratedProject)"
              Condition="'$(SerializeProjects)' == 'true' AND '%(Identity)' != ''"
              BuildInParallel="true"
-             ContinueOnError="ErrorAndContinue"
-             Properties="TargetGroup=%(Project.TargetGroup)" />
+             ContinueOnError="ErrorAndContinue" />
+
   </Target>
 
   <!-- Before resolving references, separate out project references we are converting to package dependencies. -->
