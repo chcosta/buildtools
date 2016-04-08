@@ -1,0 +1,39 @@
+<Project ToolsVersion="12.0" DefaultTargets="DownloadBlobsFromAzureTargets" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask TaskName="DownloadFromAzure" AssemblyFile="$(ToolsDir)net45/Microsoft.DotNet.Build.CloudTestTasks.dll"/>
+  <UsingTask TaskName="ListAzureContainers" AssemblyFile="$(ToolsDir)net45/Microsoft.DotNet.Build.CloudTestTasks.dll"/>
+
+  <PropertyGroup>
+    <DownloadDirectory Condition="'$(DownloadDirectory)' == ''">$(PackagesDir)/AzureTransfer</DownloadDirectory>
+  </PropertyGroup>
+
+  <!-- Not currently used -->
+  <ItemGroup>
+    <DownloadItems Include="Microsoft.CSharp.4.0.1-rc3-00001-00.nupkg" />
+  </ItemGroup>
+
+  <Target Name="DownloadBlobsFromAzureTargets" DependsOnTargets="ListAzureContainers;DownloadBlobsFromAzure" />
+
+  <!-- Grab latest azure container if a specific azure container is not specified -->
+  <Target Name="ListAzureContainers" Condition="'$(ContainerName)' == ''">
+    <Message Text="List Azur containers:" Importance="High" />
+    <ListAzureContainers AccountName="$(CloudDropAccountName)"
+                         AccountKey="$(CloudDropAccessToken)"
+                         Prefix="$(ContainerNamePrefix)">
+       <Output TaskParameter="ContainerNames" ItemName="AzureContainerName" />
+    </ListAzureContainers>
+    <Message Importance="High" Text="Container names: %(AzureContainerName.Identity)" />
+    <PropertyGroup>
+      <ContainerName>%(AzureContainerName.Identity)</ContainerName>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="DownloadBlobsFromAzure" Condition="'$(ContainerName)' != ''">
+    <Message Text="Download from Azure the container $(ContainerName)" Importance="High" />
+    <DownloadFromAzure AccountName="$(CloudDropAccountName)"
+                       AccountKey="$(CloudDropAccessToken)"
+                       ContainerName="$(ContainerName)"
+                       DownloadDirectory="$(DownloadDirectory)"
+                       Items="@(DownloadItems)" />
+  </Target>
+  
+</Project>
