@@ -2,14 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Microsoft.Build.Framework;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Globalization;
 using System.IO;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Xml;
+
+using Task = Microsoft.Build.Utilities.Task;
 
 namespace Microsoft.DotNet.Build.CloudTestTasks
 {
@@ -35,42 +38,87 @@ namespace Microsoft.DotNet.Build.CloudTestTasks
         public string ContainerName { get; set; }
 
         /// <summary>
-        /// An item group of blob filenames to download.  
-        /// </summary>
-        [Required]
-        public ITaskItem[] Items { get; set; }
-
-        /// <summary>
         /// Directory to download blob files to
         /// </summary>
         public string DownloadDirectory { get; set; }
-
-        /// <summary>
-        /// Indicates if the destination blob should be overwritten if it already exists.  The default if false.
-        /// </summary>
-        public bool Overwrite { get; set; }
-
+        
         public override bool Execute()
         {
-            DownloadDirectory = DownloadDirectory ?? Environment.CurrentDirectory;
-            if(!Directory.Exists(DownloadDirectory))
+            return ExecuteAsync().GetAwaiter().GetResult();
+        }
+
+        public async Task<bool> ExecuteAsync()
+        {
+            Log.LogMessage(MessageImportance.High, "Downloading container {0} from storage account '{1}'.", ContainerName, AccountName);
+
+            DateTime dateTime = DateTime.UtcNow;
+            List<string> blobsNames = null;
+            string urlListBlobs = string.Format("https://{0}.blob.core.windows.net/{1}?restype=container&comp=list", AccountName, ContainerName);
+            
+            Log.LogMessage(MessageImportance.Normal, "Sending request to list blobsNames for container '{0}'.", ContainerName);
+
+            using (HttpClient client = new HttpClient())
             {
-                Directory.CreateDirectory(DownloadDirectory);
+                using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, urlListBlobs))
+                {
+                    request.Headers.Add(AzureHelper.DateHeaderString, dateTime.ToString("R", CultureInfo.InvariantCulture));
+                    request.Headers.Add(AzureHelper.VersionHeaderString, AzureHelper.StorageApiVersion);
+                    request.Headers.Add(AzureHelper.AuthorizationHeaderString, AzureHelper.AuthorizationHeader(
+                            AccountName,
+                            AccountKey,
+                            "GET",
+                            dateTime,
+                            request));
+
+                    XmlDocument responseFile;
+                    using (HttpResponseMessage response = await client.SendAsync(request))
+                    {
+                        responseFile = new XmlDocument();
+                        responseFile.LoadXml(await response.Content.ReadAsStringAsync());
+                        XmlNodeList elemList = responseFile.GetElementsByTagName("Name");
+
+                        blobsNames = elemList.Cast<XmlNode>()
+                                                    .Select(x => x.InnerText)
+                                                    .ToList();
+                    }
+                }
+
+                DownloadDirectory = DownloadDirectory ?? Directory.GetCurrentDirectory();
+                foreach (string blob in blobsNames)
+                {
+                    Log.LogMessage(MessageImportance.Normal, "Downloading BLOB - {0}", blob);
+                    string urlGetBlob = string.Format("https://{0}.blob.core.windows.net/{1}/{2}", AccountName, ContainerName, blob);
+
+                    string filename = Path.Combine(DownloadDirectory, blob);
+                    string blobDirectory = blob.Substring(0, blob.LastIndexOf("/"));
+                    string downloadBlobDirectory = Path.Combine(DownloadDirectory, blobDirectory);
+                    if (!Directory.Exists(downloadBlobDirectory))
+                    {
+                        Directory.CreateDirectory(downloadBlobDirectory);
+                    }
+
+                    using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, urlGetBlob))
+                    {
+                        request.Headers.Add(AzureHelper.DateHeaderString, dateTime.ToString("R", CultureInfo.InvariantCulture));
+                        request.Headers.Add(AzureHelper.VersionHeaderString, AzureHelper.StorageApiVersion);
+                        request.Headers.Add(AzureHelper.AuthorizationHeaderString, AzureHelper.AuthorizationHeader(
+                                AccountName,
+                                AccountKey,
+                                "GET",
+                                dateTime,
+                                request));
+                        
+                        using (HttpResponseMessage response = await client.SendAsync(request))
+                        {
+                            Stream responseStream = await response.Content.ReadAsStreamAsync();
+                            using (FileStream sourceStream = File.Open(filename, FileMode.Create))
+                            {
+                                responseStream.CopyTo(sourceStream);
+                            }
+                        }
+                    }
+                }
             }
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(string.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1}", AccountName, AccountKey));
-            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
-            CloudBlobContainer container = blobClient.GetContainerReference(ContainerName);
-
-            List<IListBlobItem> blobs = container.ListBlobs(null, true)?.ToList();
-
-            foreach(IListBlobItem blob in blobs)
-            {
-                Log.LogMessage("Downloading URI - {0}", blob.Uri);
-                CloudBlob cb = new CloudBlob(blob.Uri, storageAccount.Credentials);
-                string filename = Path.Combine(DownloadDirectory, Path.GetFileName(blob.Uri.AbsolutePath));
-                cb.DownloadToFile(filename, FileMode.Create);
-            }
-
             return true;
         }
     }
