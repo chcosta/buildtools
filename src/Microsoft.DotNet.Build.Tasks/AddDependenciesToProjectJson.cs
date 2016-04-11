@@ -78,18 +78,15 @@ namespace Microsoft.DotNet.Build.Tasks
             // No PackageBuildNumberOverride was specified, so try to find one to associate with our AdditionalDependencies
             PackageBuildNumberOverride = PackageBuildNumberOverride ?? DeriveBuildNumber(projectRoot);
 
+            // No Frameworks were specified, apply AdditionalDependencies to all framework groups in the project.json
             if (Frameworks == null || Frameworks.Length == 0)
             {
-                JObject dependencies = GenerateDependencies(projectRoot);
-                projectRoot = UpdateProperty(projectRoot, dependencies);
+                Frameworks = projectRoot.SelectTokens("frameworks").SelectMany(f => f.Children().Select(c => ((JProperty)c).Name)).ToArray();
             }
-            else
+            for (int i = 0; i < Frameworks.Count(); i++)
             {
-                for (int i = 0; i < Frameworks.Length; i++)
-                {
-                    JObject dependencies = GenerateDependencies(projectRoot, Frameworks[i]);
-                    projectRoot = UpdateProperty(projectRoot, dependencies, Frameworks[i]);
-                }
+                JObject dependencies = GenerateDependencies(projectRoot, Frameworks[i]);
+                projectRoot = UpdateProperty(projectRoot, dependencies, Frameworks[i]);
             }
             WriteProject(projectRoot, OutputProjectJson);
 
@@ -99,12 +96,12 @@ namespace Microsoft.DotNet.Build.Tasks
         private string AreValidFrameworkPaths(JObject projectRoot)
         {
             if(Frameworks == null ||
-                Frameworks.Length == 0)
+                Frameworks.Count() == 0)
             {
                 return string.Empty;
             }
             // Check for a valid path, if invalid, exit
-            for (int i = 0; i < Frameworks.Length; i++)
+            for (int i = 0; i < Frameworks.Count(); i++)
             {
                 var _frameworkPath = "frameworks." + Frameworks[i];
                 var validFramework = projectRoot.SelectToken(_frameworkPath);
