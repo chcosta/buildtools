@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Build.Tasks
             {
                 Frameworks = projectRoot.SelectTokens("frameworks").SelectMany(f => f.Children().Select(c => ((JProperty)c).Name)).ToArray();
             }
-            for (int i = 0; i < Frameworks.Count(); i++)
+            for (int i = 0; i < Frameworks.Length; i++)
             {
                 JObject dependencies = GenerateDependencies(projectRoot, Frameworks[i]);
                 projectRoot = UpdateProperty(projectRoot, dependencies, Frameworks[i]);
@@ -96,12 +96,12 @@ namespace Microsoft.DotNet.Build.Tasks
         private string AreValidFrameworkPaths(JObject projectRoot)
         {
             if(Frameworks == null ||
-                Frameworks.Count() == 0)
+                Frameworks.Length == 0)
             {
                 return string.Empty;
             }
             // Check for a valid path, if invalid, exit
-            for (int i = 0; i < Frameworks.Count(); i++)
+            for (int i = 0; i < Frameworks.Length; i++)
             {
                 var _frameworkPath = "frameworks." + Frameworks[i];
                 var validFramework = projectRoot.SelectToken(_frameworkPath);
