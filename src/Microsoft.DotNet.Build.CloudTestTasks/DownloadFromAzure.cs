@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Build.CloudTestTasks
 
         public async Task<bool> ExecuteAsync()
         {
-            Log.LogMessage(MessageImportance.High, "Downloading container {0} from storage account '{1}'.", ContainerName, AccountName);
+            Log.LogMessage(MessageImportance.Normal, "Downloading container {0} from storage account '{1}'.", ContainerName, AccountName);
 
             DateTime dateTime = DateTime.UtcNow;
             List<string> blobsNames = null;
@@ -61,25 +61,33 @@ namespace Microsoft.DotNet.Build.CloudTestTasks
             {
                 using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, urlListBlobs))
                 {
-                    request.Headers.Add(AzureHelper.DateHeaderString, dateTime.ToString("R", CultureInfo.InvariantCulture));
-                    request.Headers.Add(AzureHelper.VersionHeaderString, AzureHelper.StorageApiVersion);
-                    request.Headers.Add(AzureHelper.AuthorizationHeaderString, AzureHelper.AuthorizationHeader(
-                            AccountName,
-                            AccountKey,
-                            "GET",
-                            dateTime,
-                            request));
-
-                    XmlDocument responseFile;
-                    using (HttpResponseMessage response = await client.SendAsync(request))
+                    try
                     {
-                        responseFile = new XmlDocument();
-                        responseFile.LoadXml(await response.Content.ReadAsStringAsync());
-                        XmlNodeList elemList = responseFile.GetElementsByTagName("Name");
+                        request.Headers.Add(AzureHelper.DateHeaderString, dateTime.ToString("R", CultureInfo.InvariantCulture));
+                        request.Headers.Add(AzureHelper.VersionHeaderString, AzureHelper.StorageApiVersion);
+                        request.Headers.Add(AzureHelper.AuthorizationHeaderString, AzureHelper.AuthorizationHeader(
+                                AccountName,
+                                AccountKey,
+                                "GET",
+                                dateTime,
+                                request));
 
-                        blobsNames = elemList.Cast<XmlNode>()
-                                                    .Select(x => x.InnerText)
-                                                    .ToList();
+                        XmlDocument responseFile;
+                        using (HttpResponseMessage response = await client.SendAsync(request))
+                        {
+                            responseFile = new XmlDocument();
+                            responseFile.LoadXml(await response.Content.ReadAsStringAsync());
+                            XmlNodeList elemList = responseFile.GetElementsByTagName("Name");
+
+                            blobsNames = elemList.Cast<XmlNode>()
+                                                        .Select(x => x.InnerText)
+                                                        .ToList();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.LogError("Failed to retrieve information.\n" + e.Message);
+                        return false;
                     }
                 }
 
