@@ -125,10 +125,6 @@ namespace Microsoft.DotNet.Build.Tasks
 
         private JToken GetFrameworkDependenciesSection(JObject projectJsonRoot, string framework = null)
         {
-            if(string.IsNullOrWhiteSpace(framework))
-            {
-                return projectJsonRoot["dependencies"];
-            }
             return projectJsonRoot.SelectToken("frameworks." + framework + ".dependencies");
         }
 
