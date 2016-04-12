@@ -81,11 +81,18 @@ namespace Microsoft.DotNet.Build.Tasks
             // No Frameworks were specified, apply AdditionalDependencies to all framework groups in the project.json
             if (Frameworks == null || Frameworks.Length == 0)
             {
+
                 Frameworks = projectRoot.SelectTokens("frameworks").SelectMany(f => f.Children().Select(c => ((JProperty)c).Name)).ToArray();
             }
+
+            // Update default dependencies section
+            JObject dependencies = GenerateDependencies(projectRoot);
+            projectRoot = UpdateProperty(projectRoot, dependencies);
+
+            // Update framework dependencies sections
             for (int i = 0; i < Frameworks.Length; i++)
             {
-                JObject dependencies = GenerateDependencies(projectRoot, Frameworks[i]);
+                dependencies = GenerateDependencies(projectRoot, Frameworks[i]);
                 projectRoot = UpdateProperty(projectRoot, dependencies, Frameworks[i]);
             }
             WriteProject(projectRoot, OutputProjectJson);
@@ -125,6 +132,10 @@ namespace Microsoft.DotNet.Build.Tasks
 
         private JToken GetFrameworkDependenciesSection(JObject projectJsonRoot, string framework = null)
         {
+            if(string.IsNullOrWhiteSpace(framework))
+            {
+                return projectJsonRoot["dependencies"];
+            }
             return projectJsonRoot.SelectToken("frameworks." + framework + ".dependencies");
         }
 
