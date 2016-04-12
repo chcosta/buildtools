@@ -81,7 +81,6 @@ namespace Microsoft.DotNet.Build.Tasks
             // No Frameworks were specified, apply AdditionalDependencies to all framework groups in the project.json
             if (Frameworks == null || Frameworks.Length == 0)
             {
-
                 Frameworks = projectRoot.SelectTokens("frameworks").SelectMany(f => f.Children().Select(c => ((JProperty)c).Name)).ToArray();
             }
 
