@@ -98,6 +98,12 @@
 
   <Import Project="$(MSBuildThisFileDirectory)Packaging.targets" Condition="'$(ExcludePackagingImport)'!='true' AND '$(MSBuildProjectExtension)' == '.pkgproj'" />
 
+  <!-- Property which signals whether to import buildagainstpackages.targets.  This target contains 
+       the targets necessary to build tests with project references converted to package dependencies.
+  -->
+  <PropertyGroup>
+    <_BuildAgainstPackages Condition="'$(KeepAllProjectReferences)' != 'true' and $([System.Text.RegularExpressions.Regex]::IsMatch('$(MSBuildProjectFullPath)', '\\tests\\', System.Text.RegularExpressions.RegexOptions.IgnoreCase)) and '$(MSBuildProjectExtension)' != '.builds'">$(BuildTestsAgainstPackages)</_BuildAgainstPackages>
+  </PropertyGroup>
   <!-- 
     Import the default package restore and resolve targets 
   
