@@ -4,7 +4,6 @@
 
   <PropertyGroup>
     <DownloadDirectory Condition="'$(DownloadDirectory)' == ''">$(PackagesDir)/AzureTransfer</DownloadDirectory>
-	<ContainerNamePrefix>corefx-rc3</ContainerNamePrefix>
   </PropertyGroup>
 
   <Target Name="DownloadBlobsFromAzureTargets" DependsOnTargets="ListAzureContainers;DownloadBlobsFromAzure" />
