@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Build.CloudTestTasks
 
         public async Task<bool> ExecuteAsync()
         {
-            Log.LogMessage(MessageImportance.High, "List of Azure containers in storage account '{0}'.", AccountName);
+            Log.LogMessage(MessageImportance.Normal, "List of Azure containers in storage account '{0}'.", AccountName);
 
             DateTime dateTime = DateTime.UtcNow;
             string url = string.Format("https://{0}.blob.core.windows.net/?comp=list", AccountName);
@@ -59,25 +59,33 @@ namespace Microsoft.DotNet.Build.CloudTestTasks
             {
                 using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url))
                 {
-                    request.Headers.Add(AzureHelper.DateHeaderString, dateTime.ToString("R", CultureInfo.InvariantCulture));
-                    request.Headers.Add(AzureHelper.VersionHeaderString, AzureHelper.StorageApiVersion);
-                    request.Headers.Add(AzureHelper.AuthorizationHeaderString, AzureHelper.AuthorizationHeader(
-                            AccountName,
-                            AccountKey,
-                            "GET",
-                            dateTime,
-                            request));
-
-                    XmlDocument responseFile;
-                    using (HttpResponseMessage response = await client.SendAsync(request))
+                    try
                     {
-                        responseFile = new XmlDocument();
-                        responseFile.LoadXml(await response.Content.ReadAsStringAsync());
-                        XmlNodeList elemList = responseFile.GetElementsByTagName("Name");
+                        request.Headers.Add(AzureHelper.DateHeaderString, dateTime.ToString("R", CultureInfo.InvariantCulture));
+                        request.Headers.Add(AzureHelper.VersionHeaderString, AzureHelper.StorageApiVersion);
+                        request.Headers.Add(AzureHelper.AuthorizationHeaderString, AzureHelper.AuthorizationHeader(
+                                AccountName,
+                                AccountKey,
+                                "GET",
+                                dateTime,
+                                request));
 
-                        ContainerNames = (from x in elemList.Cast<XmlNode>()
-                                          where x.InnerText.Contains(Prefix)
-                                          select new TaskItem(x.InnerText)).ToArray();
+                        XmlDocument responseFile;
+                        using (HttpResponseMessage response = await client.SendAsync(request))
+                        {
+                            responseFile = new XmlDocument();
+                            responseFile.LoadXml(await response.Content.ReadAsStringAsync());
+                            XmlNodeList elemList = responseFile.GetElementsByTagName("Name");
+
+                            ContainerNames = (from x in elemList.Cast<XmlNode>()
+                                              where x.InnerText.Contains(Prefix)
+                                              select new TaskItem(x.InnerText)).ToArray();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.LogError("Failed to retrieve information.\n" + e.Message);
+                        return false;
                     }
                 }
             }

@@ -6,16 +6,16 @@
     <DownloadDirectory Condition="'$(DownloadDirectory)' == ''">$(PackagesDir)/AzureTransfer</DownloadDirectory>
   </PropertyGroup>
 
-  <Target Name="DownloadBlobsFromAzureTargets" DependsOnTargets="ListAzureContainers;DownloadBlobsFromAzure" />
+  <Target Name="DownloadBlobsFromAzureTargets" DependsOnTargets="GetLatestContainerNameFromAzure;DownloadBlobsFromAzure" />
 
   <!-- Grab latest azure container if a specific azure container is not specified -->
-  <Target Name="ListAzureContainers" Condition="'$(ContainerName)' == ''">
+  <Target Name="GetLatestContainerNameFromAzure" Condition="'$(ContainerName)' == ''">
     <ListAzureContainers AccountName="$(CloudDropAccountName)"
                          AccountKey="$(CloudDropAccessToken)"
                          Prefix="$(ContainerNamePrefix)">
        <Output TaskParameter="ContainerNames" ItemName="AzureContainerName" />
     </ListAzureContainers>
-    <Message Importance="High" Text="Container names: %(AzureContainerName.Identity)" />
+    <Message Importance="Normal" Text="Container names: %(AzureContainerName.Identity)" />
     <PropertyGroup>
       <ContainerName>%(AzureContainerName.Identity)</ContainerName>
     </PropertyGroup>
