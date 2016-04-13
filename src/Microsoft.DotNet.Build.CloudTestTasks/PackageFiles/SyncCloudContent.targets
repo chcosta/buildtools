@@ -1,6 +1,6 @@
 <Project ToolsVersion="12.0" DefaultTargets="DownloadBlobsFromAzureTargets" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <UsingTask TaskName="DownloadFromAzure" AssemblyFile="$(ToolsDir)net45/Microsoft.DotNet.Build.CloudTestTasks.dll"/>
-  <UsingTask TaskName="ListAzureContainers" AssemblyFile="$(ToolsDir)/net45/Microsoft.DotNet.Build.CloudTestTasks.dll"/>
+  <UsingTask TaskName="DownloadFromAzure" AssemblyFile="$(MSBuildThisFileDirectory)net45\Microsoft.DotNet.Build.CloudTestTasks.dll"/>
+  <UsingTask TaskName="ListAzureContainers" AssemblyFile="$(MSBuildThisFileDirectory)net45\Microsoft.DotNet.Build.CloudTestTasks.dll"/>
 
   <PropertyGroup>
     <DownloadDirectory Condition="'$(DownloadDirectory)' == ''">$(PackagesDir)/AzureTransfer</DownloadDirectory>
