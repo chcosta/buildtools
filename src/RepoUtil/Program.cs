@@ -3,8 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace RepoUtil
 {
@@ -21,6 +24,8 @@ namespace RepoUtil
 
         internal static int Main(string[] args)
         {
+            Console.WriteLine("Attach a debugger now or press <Enter> to continue.");
+            Console.ReadLine();
             int result = 1;
             try
             {
@@ -30,12 +35,14 @@ namespace RepoUtil
             catch (ConflictingPackagesException ex)
             {
                 Console.WriteLine(ex.Message);
-                foreach (var package in ex.ConflictingPackages)
+                foreach (var package in ex.ConflictingPackages.OrderBy(p => p.PackageName))
                 {
                     Console.WriteLine(package.PackageName);
                     Console.WriteLine($"\t{package.Conflict.NuGetPackage.Version} - {package.Conflict.FileName}");
                     Console.WriteLine($"\t{package.Original.NuGetPackage.Version} - {package.Original.FileName}");
                 }
+
+                Console.WriteLine(GenerateMyConflicts(ex.ConflictingPackages));
             }
             catch (Exception ex)
             {
@@ -44,6 +51,38 @@ namespace RepoUtil
             }
 
             return result;
+        }
+
+        private static string GenerateMyConflicts(System.Collections.Immutable.ImmutableArray<NuGetPackageConflict> conflictingPackages)
+        {
+            StringBuilder returnString = new StringBuilder();
+            Dictionary<string, List<string>> myConflicts = new Dictionary<string, List<string>>();
+
+            var packages = conflictingPackages.GroupBy(p => p.PackageName).ToDictionary(p => p.Key, p => p.ToArray());
+            Regex versionRegex = new Regex(@"\d+\.\d+\.\d+-.*");
+            HashSet<string> prereleaseVersions = new HashSet<string>();
+            foreach(var package in packages)
+            {
+                returnString.Append("\"" + package.Key + "\": [ ");
+                var conflict = package.Value.Where(w => !versionRegex.IsMatch(w.Conflict.NuGetPackage.Version.ToString())).Select(s => "\"" + s.Conflict.NuGetPackage.Version.ToString() + "\"");
+                var original = package.Value.Where(w => !versionRegex.IsMatch(w.Original.NuGetPackage.Version.ToString())).Select(s => "\"" + s.Original.NuGetPackage.Version.ToString() + "\"");
+                var preRelConflict = package.Value.Where(w => versionRegex.IsMatch(w.Conflict.NuGetPackage.Version.ToString())).Select(s => s.Conflict.NuGetPackage.Version.ToString());
+                var preRelOriginal = package.Value.Where(w => versionRegex.IsMatch(w.Original.NuGetPackage.Version.ToString())).Select(s => s.Original.NuGetPackage.Version.ToString());
+
+                var distinct = conflict.Union(original);
+                returnString.Append(string.Join(", ", distinct.Where(d => !versionRegex.IsMatch(d))));
+                returnString.AppendLine(" ]");
+
+                /* build up a list of prerelease versions to determine if there will be a conflict */
+                foreach (var d in preRelConflict.Union(preRelOriginal).Where(w => versionRegex.IsMatch(w)))
+                {
+                    prereleaseVersions.Add(d);
+                }
+            }
+
+            returnString.AppendLine(Environment.NewLine + "PreRelease versions");
+            returnString.AppendLine(string.Join(", ", prereleaseVersions));
+            return returnString.ToString();
         }
 
         private static bool Run(string[] args)

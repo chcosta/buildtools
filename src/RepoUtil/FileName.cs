@@ -22,7 +22,7 @@ namespace RepoUtil
 
         internal static FileName FromFullPath(string rootPath, string fullPath)
         {
-            fullPath = fullPath.Substring(rootPath.Length + 1);
+            fullPath = rootPath[rootPath.Length - 1] == Path.DirectorySeparatorChar ? fullPath.Substring(rootPath.Length) : fullPath.Substring(rootPath.Length + 1);
             return new FileName(rootPath, fullPath);
         }
 

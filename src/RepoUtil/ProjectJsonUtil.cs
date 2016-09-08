@@ -2,10 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using NuGet.Versioning;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Collections.Immutable;
 
@@ -62,7 +63,7 @@ namespace RepoUtil
                     continue;
                 }
 
-                ChangeDependency(prop, newPackage.Version);
+                ChangeDependency(prop, newPackage.Version.ToString());
                 changed = true;
             }
 
@@ -103,7 +104,15 @@ namespace RepoUtil
             }
             else
             {
-                version = ((JObject)prop.Value).Value<string>("version");
+                var target = ((JObject)prop.Value).Value<string>("target");
+                if (target != null && target.Equals("project", StringComparison.OrdinalIgnoreCase))
+                {
+                    version = "0.0.0.0";
+                }
+                else
+                {
+                    version = ((JObject)prop.Value).Value<string>("version");
+                }
             }
 
             return new NuGetPackage(name, version);

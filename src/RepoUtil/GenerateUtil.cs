@@ -94,7 +94,7 @@ namespace RepoUtil
             {
                 var name = PackageNameToXElementName(package.Name);
                 var elem = new XElement(ns + name);
-                elem.Value = package.Version;
+                elem.Value = package.Version.ToString();
                 group.Add(elem);
             }
 

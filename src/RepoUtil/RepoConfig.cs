@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Newtonsoft.Json.Linq;
+using NuGet.Versioning;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -39,25 +40,28 @@ namespace RepoUtil
     /// </summary>
     internal class RepoConfig
     {
-        internal ImmutableArray<NuGetPackage> FixedPackages { get; }
+        internal List<NuGetPackage> FixedPackages { get; }
         internal ImmutableArray<string> ToolsetPackages { get; }
         internal ImmutableArray<Regex> NuSpecExcludes { get; }
         internal ImmutableArray<Regex> ProjectJsonExcludes { get; }
         internal GenerateData? MSBuildGenerateData { get; }
+        internal bool InferStablePackages { get; }
 
         internal RepoConfig(
             IEnumerable<NuGetPackage> fixedPackages, 
             IEnumerable<string> toolsetPackages, 
             IEnumerable<Regex> nuspecExcludes,
             IEnumerable<Regex> projectJsonExcludes,
-            GenerateData? msbuildGenerateData)
+            GenerateData? msbuildGenerateData,
+            bool inferStablePackages = false)
         {
             Debug.Assert(toolsetPackages.Distinct().Count() == toolsetPackages.Count());
             MSBuildGenerateData = msbuildGenerateData;
-            FixedPackages = fixedPackages.OrderBy(x => x.Name).ToImmutableArray();
+            FixedPackages = fixedPackages.OrderBy(x => x.Name).ToList();
             NuSpecExcludes = nuspecExcludes.ToImmutableArray();
             ProjectJsonExcludes = projectJsonExcludes.ToImmutableArray();
             ToolsetPackages = toolsetPackages.OrderBy(x => x).ToImmutableArray();
+            InferStablePackages = inferStablePackages;
 
             var map = new Dictionary<string, List<string>>();
             foreach (var nugetRef in fixedPackages)
@@ -69,7 +73,7 @@ namespace RepoUtil
                     map[nugetRef.Name] = list;
                 }
 
-                list.Add(nugetRef.Version);
+                list.Add(nugetRef.Version.ToString());
             }
         }
 
@@ -77,6 +81,12 @@ namespace RepoUtil
         {
             // Need to track any file that has dependencies
             var obj = JObject.Parse(File.ReadAllText(jsonFilePath));
+            bool inferStablePackages = false;
+            var inferStablePackagesProp = obj["inferStableVersionsAsFixedPackages"];
+            if(inferStablePackagesProp != null)
+            {
+                inferStablePackages = bool.Parse(inferStablePackagesProp.Value<string>());
+            }
             var fixedPackages = (JObject)obj["fixedPackages"];
             var fixedPackagesList = ImmutableArray.CreateBuilder<NuGetPackage>();
             foreach (var prop in fixedPackages.Properties())
@@ -126,9 +136,17 @@ namespace RepoUtil
                 toolsetPackages,
                 nuspecExcludes,
                 projectJsonExcludes,
-                msbuildGenerateData);
+                msbuildGenerateData,
+                inferStablePackages);
         }
 
+        internal void AddFixedPackage(NuGetPackage package)
+        {
+            if(!FixedPackages.Contains(package))
+            {
+                FixedPackages.Add(package);
+            }
+        }
         private static GenerateData? ReadGenerateData(JObject obj, string propName)
         {
             var prop = obj.Property(propName);

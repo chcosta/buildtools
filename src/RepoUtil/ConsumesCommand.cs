@@ -4,6 +4,7 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using NuGet.Versioning;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -50,9 +51,9 @@ namespace RepoUtil
         private JProperty GetFixedPackages()
         {
             var obj = new JObject();
-            foreach (var package in _repoData.FixedPackages.GroupBy(x => x.Name))
+            foreach (var package in _repoData.FixedPackages.OrderBy(x => x.Name).GroupBy(x => x.Name))
             {
-                obj.Add(GetProperty(package.Key, package.Select(x => x.Version)));
+                obj.Add(GetProperty(package.Key, package.Select(x => x.Version.ToString())));
             }
             return new JProperty("fixed", obj);
         }
@@ -85,7 +86,7 @@ namespace RepoUtil
 
         private static JProperty GetProperty(NuGetPackage package)
         {
-            return new JProperty(package.Name, package.Version);
+            return new JProperty(package.Name, package.Version.ToString());
         }
 
         private static JProperty GetProperty(string packageName, IEnumerable<string> versions)
@@ -101,7 +102,7 @@ namespace RepoUtil
 
         private static string GetKey(NuGetPackage nugetRef)
         {
-            return $"{nugetRef.Name}:{nugetRef.Version}";
+            return $"{nugetRef.Name}:{nugetRef.Version.ToString()}";
         }
     }
 }

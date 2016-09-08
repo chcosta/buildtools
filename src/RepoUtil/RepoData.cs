@@ -16,7 +16,7 @@ namespace RepoUtil
         internal ImmutableArray<NuGetPackage> FloatingBuildPackages { get; }
         internal ImmutableArray<NuGetPackage> FloatingToolsetPackages { get; }
         internal ImmutableArray<NuGetPackage> FloatingPackages { get; }
-        internal ImmutableArray<NuGetPackage> FixedPackages => RepoConfig.FixedPackages;
+        internal ImmutableArray<NuGetPackage> FixedPackages => RepoConfig.FixedPackages.ToImmutableArray<NuGetPackage>();
         internal ImmutableArray<NuGetPackage> AllPackages { get; }
 
         private RepoData(RepoConfig config, string sourcesPath, IEnumerable<NuGetFeed> nugetFeeds, IEnumerable<NuGetPackage> floatingPackages)
@@ -89,6 +89,14 @@ namespace RepoUtil
                     if (fixedPackageSet.Contains(package))
                     {
                         continue;
+                    }
+                    if (config.InferStablePackages)
+                    {
+                        if (package.IsStable() && !config.ToolsetPackages.Contains(package.Name))
+                        {
+                            config.AddFixedPackage(package);
+                            continue;
+                        }
                     }
 
                     // If this is the first time we've seen the package then record where it was found.  Need the source
