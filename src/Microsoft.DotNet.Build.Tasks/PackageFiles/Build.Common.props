@@ -5,10 +5,10 @@
      repo specific properties inside the repos, and move to this file everything that is common.
   -->
   <Import Project="$(MSBuildThisFileDirectory)BuildTools.Imports.props" />
-  
-  <Import Project="$(MSBuildThisFileDirectory)Paths.Common.props" Condition="'$(BuildTools_Import_PathsCommon)'=='true'" />
 
-  <Import Project="$(MSBuildThisFileDirectory)OS.Common.props" Condition="'$(BuildTools_Import_OSCommon)'=='true'" />
+  <Import Project="$(MSBuildThisFileDirectory)Paths.Common.props" Condition="'$(Import_PathsCommon)'=='true'" />
+
+  <Import Project="$(MSBuildThisFileDirectory)OS.Common.props" Condition="'$(Import_OSCommon)'=='true'" />
 
   <!--
     Import the reference assembly props
@@ -39,7 +39,7 @@
     <UseSharedCompilation Condition="'$(UseSharedCompilation)' == '' and '$(OSEnvironment)' == 'Windows_NT' and '$(UseRoslynCompilers)' != 'false'">true</UseSharedCompilation>
   </PropertyGroup>
 
-  <Import Project="$(MSBuildThisFileDirectory)Dnu.Common.props" Condition="'$(BuildTools_Import_DnuCommon)'=='true'"/>
+  <Import Project="$(MSBuildThisFileDirectory)Dnu.Common.props" Condition="'$(Import_DnuCommon)'=='true'"/>
 
   <Import Project="$(MSBuildThisFileDirectory)Roslyn.Common.props" />
 </Project>
