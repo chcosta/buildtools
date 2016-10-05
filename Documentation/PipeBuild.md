@@ -5,10 +5,15 @@ PipeBuild is our "Official Build" orchestration tool.  The tool defines pipeline
 ### Issues with PipeBuild
 
 - PipeBuild is not versioned.  
+
   - There is no way to make breaking changes without breaking anybody currently utilizing the system.
+
   - Servicing branches which use PipeBuild are required to be updated to conform to the latest version of PipeBuild, this is not sustainable.
+
 - .NET Core PipeBuild usage has a heavy reliance on VSTS build / release definitions.  The VSTS coupling provides benefits such as keeping secrets, managing machine pools, queueing builds, and reporting; but there are some difficult areas in our current usage which could be improved.
+
   - Build / release definitions are not versioned
+
   - Updating definitions is an error-prone process
   
 ### PipeBuild Changes Proposal
@@ -28,14 +33,16 @@ If you're not interested in the details, the [TL;DR](#ProposalsSummary) is next.
 - Move PipeBuild into BuildTools where it will be delivered as a package
 - Decouple pipelines / definitions from PipeBuild source and give repo owners more control over themselves
   - More control includes owning the definitions themselves as json files which may be checked in or distributed however the owner desires
+    - I'd expect most repo owners to keep pipeline / build definitions either in their repo, or in a companion repo, the point being that the definitions themselves are versioned controlled via git / branching mechanics and consuming those definitions would just be cloning a repo at a specific commit (or branch).
 - Create a separate PipeBuild launcher repo in Git which contains the BuildTools bootstrapping, plus a script which updates the version of the PipeBuild package which is used.
 
+The following, are the details.
 
 #### <a id="NuGetPackageProposal"></a>Make PipeBuild a NuGet Package
 
 Delivering PipeBuild as a NuGet package will allow us to version our PipeBuild releases, and permit consumers to be explicit about which verison of PipeBuild they rely on.
 
-Packaging PipeBuild solves the "versioning" problem, but we also need a mechanism which makes it simple for consumers to use 
+Packaging PipeBuild solves the "versioning" problem, but we also need a mechanism which makes it simple for consumers to use the tool from a simple command without jumping through hoops. 
 
 *Proposed solutions*
 
@@ -46,9 +53,11 @@ With PipeBuild delivered as a package, we need to provide a way to use that pack
 1. Use the bootstrap tooling which is already implemented in BuildTools.  We can create a barebones repo (eg. PipeBuildInstaller), which contains the bootstrap tooling tailored towards the PipeBuild package, plus a script which updates ".toolsversion" and executes the bootstrap process.  I'd probably want this barebones repo to live in Git where we can more tightly control access to it than we could on GitHub.
  
    Positives: 
-   - we're using the same bootstrap mechanisms we use in BuildTools
+
+   - We're using the same bootstrap mechanisms we use in BuildTools
 
    Negatives:
+
    - Bootstrap might still be more than we need since we don't require x-plat capability for PipeBuild.  ie, we don't need cli or any of the related x-plat scripting
 
 2. Create a barebones wrapper project which passes through to PipeBuild.  Provide a script which writes out a project.json file with an entry for the version of PipeBuild that we want to build / run.
@@ -94,7 +103,7 @@ namespace PipeBuildLauncher
     - Self-contained launcher scoped for PipeBuild makes it easy to launch any version of PipeBuild we care about.
 
     Negatives:
-    - It's its own thing, one more piece of technology that we need to maintain (though maintenance cost should be low).
+    - It is its own thing, one more piece of technology that we need to maintain (though maintenance cost should be low).
 
 My preference is to use the bootstrapping because I really want to limit the amount of technology we own if it's not necessary. 
 
@@ -135,7 +144,7 @@ Transitioning to a versioned / packaged version of PipeBuild is a major split fr
 1. Create a new repo for PipeBuild on GitHub.
   
    Positives
-   - Allows control over builds / releases / branching / etc...
+   - Allows fine control over builds / releases / branching / etc...
 
    Negatives
    - Owning another repo
