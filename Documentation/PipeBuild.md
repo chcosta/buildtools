@@ -26,7 +26,16 @@ PipeBuild is our "Official Build" orchestration tool.  The tool defines pipeline
 
 - [Move Sources to GitHub](#GitHubProposal)
 
-If you're not interested in the details, the [TL;DR](#ProposalsSummary) is next.
+If you're not interested in the [details](#NuGetPackageProposal), the [TL;DR](#ProposalsSummary) is in the next section.  
+
+There are a few additional project changes which were considered, but have been deferred.
+
+- Use VSTS "Demands" for locking build machine requirements. 
+  - We have an issue today where our build machines have occasionally had installed pre-requisites changed without us knowing.  Utilizing VSTS demands to explicitly require pre-requisites, and then controlling those via checked in build definitions, may prevent many of those types of issues.
+  - The pieces in this area with respect to acquiring machines, installing pre-requisites, establishing a formal process; are in flux enough that I think it's a bit premature to invest heavily at the moment from the PipeBuild perspective.
+- Provide tooling for downloading / editing / creating / managing build definitions via the command-line
+  - We don't, yet, have an implementation for checked in build definitions.  Without customer usage, it's difficult to foresee where the major pain points will be with respect to the new model.  We shouldn't invest heavily in supporting the system until we recognize the problem areas and are able to assess the value gained by addressing them.
+
 
 #### <a id="ProposalsSummary"></a>Proposed Changes Summary (TL;DR)
 
@@ -36,7 +45,7 @@ If you're not interested in the details, the [TL;DR](#ProposalsSummary) is next.
     - I'd expect most repo owners to keep pipeline / build definitions either in their repo, or in a companion repo, the point being that the definitions themselves are versioned controlled via git / branching mechanics and consuming those definitions would just be cloning a repo at a specific commit (or branch).
 - Create a separate PipeBuild launcher repo in Git which contains the BuildTools bootstrapping, plus a script which updates the version of the PipeBuild package which is used.
 
-The following, are the details.
+The following, are the [details](#NuGetPackageProposal).
 
 #### <a id="NuGetPackageProposal"></a>Make PipeBuild a NuGet Package
 
