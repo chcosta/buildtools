@@ -43,8 +43,11 @@ I'd like to create a package, in BuildTools, named Microsoft.DotNet.Build.VSTSBu
 A typical usage would be...
 
 ```C#
-        VSTSBuildsApi.VSTSBuilds buildsManager = new VSTSBuildsManager.VSTSBuilds(collectionId, CredentialsManager.GetAuthenticationHeaderCredentials(this));
-        DefinitionId = buildsManager.CreateOrUpdateDefinition(DefinitionPath);
+                VSTSBuildsApi.VSTSBuildClient buildsManager = new VSTSBuildsApi.VSTSBuildClient(collectionId,  CredentialsManager.GetAuthenticationHeaderCredentials(this));
+                using (Stream stream = File.Open(DefinitionPath, FileMode.Open))
+                {
+                    DefinitionId = int.Parse(buildsManager.CreateOrUpdateDefinition(stream)));
+                }
 ```
 
 Given a definition path, VSTSBuildsApi would:
