@@ -35,18 +35,9 @@ I'd like to create a package, in BuildTools, named Microsoft.DotNet.Build.VSTSBu
         /// check VSTS for a matching definition name, if present, update that definition with the
         /// local build definition, otherwise create a new definition.
         /// </summary>
-        /// <param name="definitionPath">Path to a local VSTS build definition</param>
+        /// <param name="stream">Stream to a VSTS build definition</param>
         /// <returns>Created or updated build Id</returns>
-        public string CreateOrUpdateDefinition(string definitionPath)
-
-        /// <summary>
-        /// Load a local build definition, combine the uniqueIdentifier with the definition name, 
-        /// check VSTS for a matching definition name, if present, update that definition with the
-        /// local build definition, otherwise create a new definition.
-        /// </summary>
-        /// <param name="definition">VSTS build definition JSON object</param>
-        /// <returns>Created or updated build definition id</returns>
-        public string CreateOrUpdateDefinition(JObject definition)
+        public string CreateOrUpdateDefinition(Stream stream)
 ```
 
 A typical usage would be...
@@ -90,5 +81,13 @@ The two obvious choices for checked in build definition locations are:
 2. GitHub - This is a nice choice because it has the benefit of evolving / moving, along with the code it is tied to.  On the negative side, it forces every dev to carry these definitions with in their enlistment them when 99.9% of devs will not need or care about them.
 
 My preference is for option 1.  There is a small maintenance cost which we will have to pay, but we should be cognizant of changes in this area anyways.  We're still able to branch / fork build definitions in sync with product changes. 
+
+**REST API Contract support**
+
+The "VSTSBuildsApi" library will support The [TFS build contract for a build definition](https://www.visualstudio.com/en-us/docs/integrate/extensions/reference/client/api/tfs/build/contracts/builddefinition) used by VSTS REST API version 2.0.  Checked in build definitions must conform to this spec to be supported. 
+
+
+
+
 
 
