@@ -92,7 +92,12 @@ We are going to prefer option 2. We will be able to manage our build deifnitions
 
 The "VSTSBuildsApi" library will support The [TFS build contract for a build definition](https://www.visualstudio.com/en-us/docs/integrate/extensions/reference/client/api/tfs/build/contracts/builddefinition) used by VSTS REST API version 2.0.  Checked in build definitions must conform to this spec to be supported. 
 
+**Future goals**
 
+- Abstract build definitions
+- Secrets management
+- Handling repo-shared build definitions.
+  - store them in BuildTools?
 
 
 
