@@ -2,7 +2,7 @@ Note that this document relates to checking in existing build definitions which 
 
 #### Summary
 
-I would like to create a stand-alone package in BuildTools named Microsoft.DotNet.Builds.VSTSBuildsApi that would allow us to group build definitions together and, given a checked in build definition, it would create or update the grouped VSTS build definition and return that build definition's id for use in a build orchestration tool. 
+We will create a stand-alone package in BuildTools named Microsoft.DotNet.Builds.VSTSBuildsApi that would allow us to group build definitions together and, given a checked in build definition, it would create or update the grouped VSTS build definition and return that build definition's id for use in a build orchestration tool. 
 
 #### <a id="CheckInDefinitionsProposal"></a>Checked-in Build Definitions
 
@@ -37,7 +37,7 @@ I'd like to create a package, in BuildTools, named Microsoft.DotNet.Build.VSTSBu
         /// </summary>
         /// <param name="stream">Stream to a VSTS build definition</param>
         /// <returns>Created or updated build Id</returns>
-        public string CreateOrUpdateDefinition(Stream stream)
+        public string CreateOrUpdateDefinitionAsync(Stream stream)
 ```
 
 A typical usage would be...
@@ -73,7 +73,8 @@ Here are a couple of options for uniquely identifying a build definition
 
 - Don't uniquely identify a build definition, just always create a new one.
 
-My preference is for option (2).  Using an identifier provides a hook so that we can relate any build definition back to the instance which spawned it (something which is often difficult to do).  This would also allow us to have multiple build systems utilizing the infrastructure which would be less likely to encounter name collisions, ie greater flexibility.
+*Solution* 
+We are going to go for an option which is a combination of the first and second option.  We will specify a unique identifier, but also use the repo branch /name as the identifier. Using an identifier provides a hook so that we can relate any build definition back to the instance which spawned it (something which is often difficult to do).  This will also allow us to have multiple build systems utilizing the infrastructure which would be less likely to encounter name collisions, ie greater flexibility.  We may potentially specify some additional identifer such as "PipeBuild" or "Jenkins".
 
 **Build definition repositories**
 
@@ -83,7 +84,9 @@ The two obvious choices for checked in build definition locations are:
 
 2. GitHub - This is a nice choice because it has the benefit of evolving / moving, along with the code it is tied to.  On the negative side, it forces every dev to carry these definitions with in their enlistment them when 99.9% of devs will not need or care about them.
 
-My preference is for option 1.  There is a small maintenance cost which we will have to pay, but we should be cognizant of changes in this area anyways.  We're still able to branch / fork build definitions in sync with product changes. 
+*Solution* 
+
+We are going to prefer option 2. We will be able to manage our build deifnitions along with the source code they are associated with. We will also be able to branch / fork build definitions in sync with product changes. 
 
 **REST API Contract support**
 
