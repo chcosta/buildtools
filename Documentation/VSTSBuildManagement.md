@@ -74,6 +74,7 @@ Here are a couple of options for uniquely identifying a build definition
 - Don't uniquely identify a build definition, just always create a new one.
 
 *Solution* 
+
 We are going to go for an option which is a combination of the first and second option.  We will specify a unique identifier, but also use the repo branch /name as the identifier. Using an identifier provides a hook so that we can relate any build definition back to the instance which spawned it (something which is often difficult to do).  This will also allow us to have multiple build systems utilizing the infrastructure which would be less likely to encounter name collisions, ie greater flexibility.  We may potentially specify some additional identifer such as "PipeBuild" or "Jenkins".
 
 **Build definition repositories**
