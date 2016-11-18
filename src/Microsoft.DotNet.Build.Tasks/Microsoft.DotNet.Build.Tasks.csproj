@@ -24,7 +24,6 @@
     <Compile Include="GatherFoldersToRestore.cs" />
     <Compile Include="GenerateAssemblyList.cs" />
     <Compile Include="AddDependenciesToProjectJson.cs" />
-    <Compile Include="FilterRuntimesFromSupports.cs" />
     <Compile Include="GenerateTestExecutionScripts.cs" />
     <Compile Include="GenerateCurrentVersion.cs" />
     <Compile Include="GenerateResourcesCode.cs" />
@@ -49,6 +48,7 @@
     <Compile Include="SignTypeItem.cs" />
     <Compile Include="UpdatePackageDependencyVersion.cs" />
     <Compile Include="IsRestoreRequired.cs" />
+    <Compile Include="TargetSelection.cs" />
     <Compile Include="ValidateExactRestore.cs" />
     <Compile Include="VersionTools\BaseDependenciesTask.cs" />
     <Compile Include="VersionTools\MsBuildTraceListener.cs" />
