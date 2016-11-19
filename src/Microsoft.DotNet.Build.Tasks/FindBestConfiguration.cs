@@ -6,10 +6,13 @@ using System.Linq;
 
 namespace Microsoft.DotNet.Build.Tasks
 {
-    public class TargetSelection : Task
+    public class FindBestConfiguration : Task
     {
+        private static readonly char s_SupportedGroupsSeparator = '|';
+        private static readonly char s_VerticalGroupsSeparator = '-';
+
         [Required]
-        public string SupportedGroups { get; set; }
+        public string ProjectConfigurations { get; set; }
 
         [Required]
         public string SelectionGroup { get; set; }
@@ -30,13 +33,12 @@ namespace Microsoft.DotNet.Build.Tasks
         [Output]
         public ITaskItem OutputItem { get; set; }
 
-
         public override bool Execute()
         {
-            string[] verticalGroups = SupportedGroups.Split(';');
-            string[] supportedTargetGroups = verticalGroups.Select(v => v.Split('_')[0]).Where(w => !string.IsNullOrWhiteSpace(w)).ToArray();
+            string[] configurations = ProjectConfigurations.Split(';');
+            string[] supportedTargetGroups = configurations.Select(s => s.Split(s_SupportedGroupsSeparator)[0]).Where(w => !string.IsNullOrWhiteSpace(w)).ToArray();
 
-            string[] tokens = SelectionGroup.Split('_');
+            string[] tokens = SelectionGroup.Split(s_VerticalGroupsSeparator);
             string osGroup = tokens[0];
             string targetGroup = tokens[1];
             string originalTargetGroup = targetGroup;
@@ -64,7 +66,7 @@ namespace Microsoft.DotNet.Build.Tasks
                 metadata.Add("TargetGroup", targetGroup);
             }
 
-            string[] supportedOSGroups = verticalGroups.Where(v => v.Contains(targetGroup)).Select(v => v.Split('_')[1]).ToArray();
+            string[] supportedOSGroups = configurations.Where(v => v.Contains(targetGroup)).Select(v => v.Split(s_SupportedGroupsSeparator)[1]).ToArray();
             Dictionary<string, ITaskItem> searchOSGroups = OSGroups.ToDictionary(o => o.ItemSpec, o => o);
             string compatibleOSGroup = FindCompatibleOSGroup(osGroup, supportedOSGroups, searchOSGroups);
             metadata.Add("OSGroup", compatibleOSGroup);
@@ -85,7 +87,7 @@ namespace Microsoft.DotNet.Build.Tasks
                 return osGroup;
             }
 
-            return FindCompatibleOSGroup(searchOSGroups[osGroup].GetMetadata("FallbackGroup"), supportedOsGroups, searchOSGroups);
+            return FindCompatibleOSGroup(searchOSGroups[osGroup].GetMetadata("Imports"), supportedOsGroups, searchOSGroups);
         }
 
         private string FindCompatibleTargetGroup(string targetGroup, string [] supportedTargetGroups, Dictionary<string, ITaskItem> searchTargetGroups, bool UseCompileFramework = false)
@@ -107,7 +109,7 @@ namespace Microsoft.DotNet.Build.Tasks
             {
                 return targetGroup;
             }
-            return FindCompatibleTargetGroup(searchTargetGroups[targetGroup].GetMetadata("FallbackGroup"), supportedTargetGroups, searchTargetGroups);
+            return FindCompatibleTargetGroup(searchTargetGroups[targetGroup].GetMetadata("Imports"), supportedTargetGroups, searchTargetGroups);
         }
     }
 }
