@@ -35,9 +35,9 @@ foreach(@imageItems) {
 }
 
 #cleanup docker cache
-my $stopDockerOutput = `systemctl stop docker`;
+my $stopDockerOutput = `service docker stop`;
 printf "$stopDockerOutput\n";
 my $removeCacheOutput = `rm -rf /var/lib/docker`;
 printf "$removeCacheOutput\n";
-my $startDockerOutput = `systemctl start docker`;
+my $startDockerOutput = `service docker start`;
 printf "$startDockerOutput\n";
