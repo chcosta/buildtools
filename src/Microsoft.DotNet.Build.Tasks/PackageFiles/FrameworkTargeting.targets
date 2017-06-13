@@ -106,7 +106,7 @@
   <Import Project="IL.targets"
            Condition="'$(MSBuildProjectExtension)' == '.ilproj' AND '$(SkipImportILTargets)'!='true'" />
 
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets"
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets"
           Condition="'$(TargetFrameworkIdentifier)' == '.NETPortable' and '$(MSBuildProjectExtension)' == '.csproj'" />
 
   <!--
@@ -121,7 +121,7 @@
   <Import Project="$(CSharpTargetsFile)"
           Condition="'$(TargetFrameworkIdentifier)' != '.NETPortable' and '$(MSBuildProjectExtension)' == '.csproj'" />
 
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.VisualBasic.targets"
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.VisualBasic.targets"
           Condition="'$(TargetFrameworkIdentifier)' == '.NETPortable' and '$(MSBuildProjectExtension)' == '.vbproj'" />
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets"

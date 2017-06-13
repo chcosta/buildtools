@@ -11,7 +11,7 @@ set PACKAGES_DIR=%PACKAGES_DIR:"=%
 set BUILDTOOLS_PACKAGE_DIR=%~dp0
 set MICROBUILD_VERSION=0.2.0
 set PORTABLETARGETS_VERSION=0.1.1-dev
-set ROSLYNCOMPILERS_VERSION=2.0.0-rc
+set ROSLYNCOMPILERS_VERSION=2.3.0-beta2-61716-09
 
 :: Determine if the CLI supports MSBuild projects. This controls whether csproj files are used for initialization and package restore.
 set CLI_VERSION=
@@ -52,8 +52,8 @@ if [%BUILDTOOLS_USE_CSPROJ%]==[] (
   set PROJECT_EXTENSION=csproj
   set PUBLISH_TFM=netcoreapp2.0
 )
-set INIT_TOOLS_RESTORE_ARGS=--source https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json --source https://api.nuget.org/v3/index.json %INIT_TOOLS_RESTORE_ARGS%
-set TOOLRUNTIME_RESTORE_ARGS=--source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json %INIT_TOOLS_RESTORE_ARGS%
+set INIT_TOOLS_RESTORE_ARGS=--source https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json --source https://api.nuget.org/v3/index.json --source https://dotnet.myget.org/F/roslyn/api/v3/index.json --source https://dotnet.myget.org/F/msbuild/api/v3/index.json %INIT_TOOLS_RESTORE_ARGS%
+set TOOLRUNTIME_RESTORE_ARGS=--source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json --source https://dotnet.myget.org/F/roslyn/api/v3/index.json --source https://dotnet.myget.org/F/msbuild/api/v3/index.json %INIT_TOOLS_RESTORE_ARGS%
 
 if not exist "%PROJECT_DIR%" (
   echo ERROR: Cannot find project root path at [%PROJECT_DIR%]. Please pass in the source directory as the 1st parameter.

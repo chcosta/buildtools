@@ -53,7 +53,7 @@ else
     __PUBLISH_TFM=netcoreapp2.0
 fi
 
-__INIT_TOOLS_RESTORE_ARGS="--source https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json --source https://api.nuget.org/v3/index.json ${__INIT_TOOLS_RESTORE_ARGS:-}"
+__INIT_TOOLS_RESTORE_ARGS="--source https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json --source https://api.nuget.org/v3/index.json --source https://dotnet.myget.org/F/roslyn/api/v3/index.json --source https://dotnet.myget.org/F/msbuild/api/v3/index.json ${__INIT_TOOLS_RESTORE_ARGS:-}"
 __TOOLRUNTIME_RESTORE_ARGS="--source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json ${__INIT_TOOLS_RESTORE_ARGS}"
 
 if [ ! -d "$__PROJECT_DIR" ]; then

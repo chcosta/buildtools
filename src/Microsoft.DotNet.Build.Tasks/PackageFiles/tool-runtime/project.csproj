@@ -6,20 +6,24 @@
     <RuntimeIdentifiers>centos.7-x64;debian.8-x64;fedora.23-x64;fedora.24-x64;opensuse.13.2-x64;opensuse.42.1-x64;osx.10.10-x64;rhel.7-x64;ubuntu.14.04-x64;ubuntu.16.04-x64;ubuntu.16.10-x64;win7-x64;win7-x86</RuntimeIdentifiers>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">$(PackageTargetFallback);dnxcore50;portable-net45+win8</PackageTargetFallback>
     <OutputType>Exe</OutputType>
+
+    <MSBuild_Version>15.3.0-preview-000378-01</MSBuild_Version>
+    <PlatformAbstractionsVersion>2.0.0-preview2-25407-01</PlatformAbstractionsVersion>
+    <Roslyn_Version>2.3.0-beta2-61716-09</Roslyn_Version>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
-    <PackageReference Include="Microsoft.Build.Framework" Version="15.1.0-preview-000523-01" />
-    <PackageReference Include="Microsoft.Build.Runtime" Version="15.1.0-preview-000523-01" />
-    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.1.0-preview-000523-01" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.0-preview-000523-01" />
-    <PackageReference Include="Microsoft.Build" Version="15.1.0-preview-000523-01" />
-    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="1.2.0-beta-001090" />
-    <PackageReference Include="Microsoft.Net.Compilers.netcore" Version="2.0.0-rc" />
-    <PackageReference Include="Microsoft.Net.Compilers.Targets.NetCore" Version="0.1.5-dev" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="$(MSBuild_Version)" />
+    <PackageReference Include="Microsoft.Build.Runtime" Version="$(MSBuild_Version)" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="$(MSBuild_Version)" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MSBuild_Version)" />
+    <PackageReference Include="Microsoft.Build" Version="$(MSBuild_Version)" />
     <PackageReference Include="Microsoft.Cci" Version="4.0.0-rc4-24217-00" />
-    <PackageReference Include="System.Composition" Version="1.1.0-preview1-25204-02" />
+    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(PlatformAbstractionsVersion)" />
+    <PackageReference Include="Microsoft.Net.Compilers.netcore" Version="$(Roslyn_Version)" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="System.Composition" Version="1.1.0-preview1-25204-02" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.3.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
