@@ -42,7 +42,7 @@
       <AdditionalRestoreArgs Condition="'$(_RepoApiAdditionalRestoreArgs)' != ''">$(AdditionalRestoreArgs) $(_RepoApiAdditionalRestoreArgs)</AdditionalRestoreArgs>
 
       <_DnuRestoreCommandRidPortion Condition="'$(RidSpecificAssets)' == 'true'">-r $(NuGetRuntimeIdentifier)</_DnuRestoreCommandRidPortion>
-      <_DnuRestoreCommandFull>$(DnuRestoreCommand) $(ProjectJson) /p:TargetGroup=$(TargetGroup) /p:ConfigurationGroup=$(ConfigurationGroup) /p:ArchGroup=$(ArchGroup) /p:OSGroup=$(OSGroup) /p:TargetFramework=$(NuGetTargetMonikerShort) $(_DnuRestoreCommandRidPortion) $(AdditionalRestoreArgs)</_DnuRestoreCommandFull>
+      <_DnuRestoreCommandFull>$(DnuRestoreCommand) $(ProjectJson) /l:ChcostaLogger,$(MSBuildThisFileDirectory)Microsoft.DotNet.Build.Tasks.dll /p:TargetGroup=$(TargetGroup) /p:ConfigurationGroup=$(ConfigurationGroup) /p:ArchGroup=$(ArchGroup) /p:OSGroup=$(OSGroup) /p:TargetFramework=$(NuGetTargetMonikerShort) $(_DnuRestoreCommandRidPortion) $(AdditionalRestoreArgs)</_DnuRestoreCommandFull>
     </PropertyGroup>
     <Exec Condition="Exists('$(ProjectJson)') AND '$(RestoreRequired)' == 'true'" Command="$(_DnuRestoreCommandFull)" StandardOutputImportance="Low" CustomErrorRegularExpression="^Unable to locate .*" />
     

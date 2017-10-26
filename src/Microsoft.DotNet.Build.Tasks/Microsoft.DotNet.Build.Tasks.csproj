@@ -20,6 +20,7 @@
   <ItemGroup>
     <Compile Include="AddItemIndices.cs" />
     <Compile Include="BinClashLogger.cs" />
+    <Compile Include="ChcostaLogger.cs" />
     <Compile Include="CleanupVSTSAgent.cs" />
     <Compile Include="ComputeDestinationsForDependencies.cs" />
     <Compile Include="Delegates.cs" />
